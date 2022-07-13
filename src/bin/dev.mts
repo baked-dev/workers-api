@@ -1,20 +1,28 @@
-import esbuild from "../util/esbuild.mjs";
-import { watch } from "chokidar";
 import { Log, LogLevel, Miniflare } from "miniflare";
+import { Plugin } from "esbuild";
+import esbuild from "../util/esbuild.mjs";
 
-export default async () => {
+const makeFlare = async () => {
   const flare = new Miniflare({
     wranglerConfigPath: true,
     modules: true,
     log: new Log(LogLevel.INFO),
   });
-
-  await esbuild(false);
   await flare.startServer();
+  return flare;
+};
 
-  const watcher = watch("./api");
-  watcher.on("change", async () => {
-    await esbuild(false);
-    await flare.reload();
-  });
+const miniflarePlugin: Plugin = {
+  name: "MiniflarePlugin",
+  async setup(build) {
+    let flare: Promise<Miniflare>;
+    build.onEnd(async () => {
+      if (!flare) flare = makeFlare();
+      else await (await flare).reload();
+    });
+  },
+};
+
+export default async () => {
+  await esbuild({ minify: false, plugins: [miniflarePlugin], watch: true });
 };

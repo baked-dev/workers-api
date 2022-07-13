@@ -9,22 +9,30 @@ function transformRecord<T = unknown, R = unknown>(
   return copy as Record<string, R>;
 }
 
-interface CustomRouter {
-  beforeMatch: (
-    req: Request,
-    ctx: ExecutionContext
-  ) => Promise<string | Response> | string | Response;
-  afterHandler: (
-    req: Request,
-    res: Response,
-    ctx: ExecutionContext
-  ) => Promise<Response> | Response;
-  notFound: (req: Request) => Promise<Response> | Response;
+type Awaitable<T> = Promise<T> | T;
+
+export interface CustomRouterBeforeMatch {
+  (req: Request, ctx: ExecutionContext): Awaitable<string | Response>;
 }
 
-const defaultBeforeMatch = (req: Request) => req.url;
-const defaultAfterHandler = (_: Request, res: Response) => res;
-const defaultNotFound = () => new Response("Not found", { status: 404 });
+export interface CustomRouterAfterHandler {
+  (req: Request, res: Response, ctx: ExecutionContext): Awaitable<Response>;
+}
+
+export interface CustomRouterNotFound {
+  (req: Request): Awaitable<Response>;
+}
+
+export interface CustomRouter {
+  beforeMatch: CustomRouterBeforeMatch;
+  afterHandler: CustomRouterAfterHandler;
+  notFound: CustomRouterNotFound;
+}
+
+const defaultBeforeMatch: CustomRouterBeforeMatch = (req) => req.url;
+const defaultAfterHandler: CustomRouterAfterHandler = (_, res) => res;
+const defaultNotFound: CustomRouterNotFound = () =>
+  new Response("Not found", { status: 404 });
 
 const makeRouter = (
   handlers: [string, Promise<ExportedHandlerFetchHandler>][],

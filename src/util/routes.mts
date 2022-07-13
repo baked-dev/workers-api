@@ -24,9 +24,9 @@ export default async () => {
   const routes = await glob(routeGlob);
   return routes
     .map((route) => {
-      const [, , ...segments] = route.split("/");
-      const filename = segments.pop()?.replace(/\.[m|c]?[t|j]s$/, "");
-      if (filename && filename !== "index") segments.push(filename);
+      const [, , ...segments] = route.split("/"); // remove ./api/
+      const filename = segments.pop()?.replace(/\.[m|c]?[t|j]s$/, ""); // pop last item and remove extension
+      if (filename && filename !== "index") segments.push(filename); // add back to segments unless its the "index" segment
       return [segments, makeImport(route, segments)] as const;
     })
     .sort(([segmentsA], [segmentsB]) => {

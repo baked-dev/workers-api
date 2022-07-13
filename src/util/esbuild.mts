@@ -1,9 +1,8 @@
-import { build as esbuild } from "esbuild";
-import { remove } from "fs-extra";
+import { build as esbuild, BuildOptions, Plugin } from "esbuild";
 import { join } from "path";
 import entry from "./entry.mjs";
 
-export default async (minify: boolean) => {
+export default async (options: BuildOptions = {}) => {
   const contents = await entry();
   await esbuild({
     bundle: true,
@@ -19,6 +18,6 @@ export default async (minify: boolean) => {
     outfile: join(process.cwd(), "./dist/worker.mjs"),
     sourcemap: false,
     charset: "utf8",
-    minify,
+    ...options,
   });
 };
