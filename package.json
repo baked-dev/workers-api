@@ -4,7 +4,7 @@
   "description": "",
   "main": "dist/index.mjs",
   "scripts": {
-    "build": "tsup src/index.mts --format esm --target esnext --clean"
+    "build": "tsup src/bin.mts src/index.ts --dts src/index.ts --format esm --target esnext --clean"
   },
   "keywords": [],
   "author": "",
@@ -23,5 +23,5 @@
     "glob": "^8.0.3",
     "miniflare": "^2.6.0"
   },
-  "bin": "./dist/index.mjs"
+  "bin": "./dist/bin.mjs"
 }
